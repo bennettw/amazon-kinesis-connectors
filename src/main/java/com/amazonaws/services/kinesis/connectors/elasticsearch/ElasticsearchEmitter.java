@@ -15,6 +15,8 @@
 package com.amazonaws.services.kinesis.connectors.elasticsearch;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -23,7 +25,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequestBuilder;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
-import org.elasticsearch.action.admin.cluster.health.ClusterHealthStatus;
 import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkItemResponse.Failure;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -31,13 +32,14 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.transport.NoNodeAvailableException;
 import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.cluster.health.ClusterHealthStatus;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 
 import com.amazonaws.services.kinesis.connectors.KinesisConnectorConfiguration;
 import com.amazonaws.services.kinesis.connectors.UnmodifiableBuffer;
 import com.amazonaws.services.kinesis.connectors.interfaces.IEmitter;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
 public class ElasticsearchEmitter implements IEmitter<ElasticsearchObject> {
     private static final Log LOG = LogFactory.getLog(ElasticsearchEmitter.class);
@@ -102,9 +104,9 @@ public class ElasticsearchEmitter implements IEmitter<ElasticsearchObject> {
      */
     private long BACKOFF_PERIOD = 10000;
 
-    public ElasticsearchEmitter(KinesisConnectorConfiguration configuration) {
+    public ElasticsearchEmitter(KinesisConnectorConfiguration configuration) throws UnknownHostException {
         Settings settings =
-                ImmutableSettings.settingsBuilder()
+                Settings.builder()
                         .put(ELASTICSEARCH_CLUSTER_NAME_KEY, configuration.ELASTICSEARCH_CLUSTER_NAME)
                         .put(ELASTICSEARCH_CLIENT_TRANSPORT_SNIFF_KEY, configuration.ELASTICSEARCH_TRANSPORT_SNIFF)
                         .put(ELASTICSEARCH_CLIENT_TRANSPORT_IGNORE_CLUSTER_NAME_KEY,
@@ -116,8 +118,8 @@ public class ElasticsearchEmitter implements IEmitter<ElasticsearchObject> {
         elasticsearchEndpoint = configuration.ELASTICSEARCH_ENDPOINT;
         elasticsearchPort = configuration.ELASTICSEARCH_PORT;
         LOG.info("ElasticsearchEmitter using elasticsearch endpoint " + elasticsearchEndpoint + ":" + elasticsearchPort);
-        elasticsearchClient = new TransportClient(settings);
-        elasticsearchClient.addTransportAddress(new InetSocketTransportAddress(elasticsearchEndpoint, elasticsearchPort));
+        elasticsearchClient = new PreBuiltTransportClient(settings);
+        elasticsearchClient.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(elasticsearchEndpoint), elasticsearchPort));
     }
 
     /**

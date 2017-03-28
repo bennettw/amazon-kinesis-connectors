@@ -23,9 +23,10 @@
     </licenses>
 
     <properties>
-        <amazon-kinesis-client.version>1.7.2</amazon-kinesis-client.version>
-        <aws-java-sdk.version>1.11.14</aws-java-sdk.version>
-        <elasticsearch.version>1.2.1</elasticsearch.version>
+        <amazon-kinesis-client.version>1.7.3</amazon-kinesis-client.version>
+        <aws-java-sdk.version>1.11.86</aws-java-sdk.version>
+        <elasticsearch.version>5.1.2</elasticsearch.version>
+        <lucene.version>6.3.0</lucene.version>
         <fasterxml-jackson.version>2.6.6</fasterxml-jackson.version>
     </properties>
 
@@ -75,6 +76,11 @@
             <version>${elasticsearch.version}</version>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>transport</artifactId>
+            <version>${elasticsearch.version}</version>
+        </dependency>
 
         <!-- Test -->
         <dependency>
@@ -102,6 +108,19 @@
             <groupId>org.easymock</groupId>
             <artifactId>easymock</artifactId>
             <version>3.4</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>2.7</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.7</version>
             <scope>test</scope>
         </dependency>
 
